@@ -1,0 +1,1545 @@
+basePath: /api/v1
+definitions:
+  handler.ApproveRequest:
+    properties:
+      comment:
+        example: Document looks correct
+        type: string
+    type: object
+  handler.LinkSailorRequest:
+    properties:
+      sailor_id:
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type: string
+    type: object
+  handler.LoginRequest:
+    properties:
+      email:
+        example: judge@example.com
+        type: string
+      password:
+        example: securepassword123
+        type: string
+    type: object
+  handler.RecordRaceRequest:
+    properties:
+      boat_class:
+        example: Optimist
+        type: string
+      finish_time:
+        example: 125.5
+        type: number
+      group_id:
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type: string
+      penalty:
+        example: DSQ
+        type: string
+      sail_number:
+        example: "10"
+        type: string
+      sailor_id:
+        example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        type: string
+    type: object
+  handler.RegisterRequest:
+    properties:
+      email:
+        example: judge@example.com
+        type: string
+      first_name:
+        example: John
+        type: string
+      last_name:
+        example: Smith
+        type: string
+      password:
+        example: securepassword123
+        type: string
+      role:
+        enum:
+        - judge
+        - secretary
+        - admin
+        example: judge
+        type: string
+    type: object
+  handler.UpdateResultRequest:
+    properties:
+      finish_time:
+        example: 125.5
+        type: number
+      penalty:
+        example: DSQ
+        type: string
+      place:
+        example: 1
+        type: integer
+    type: object
+  model.Category:
+    properties:
+      age_from:
+        type: integer
+      age_to:
+        type: integer
+      boat_class:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  model.Document:
+    properties:
+      checked_by:
+        type: string
+      comment:
+        type: string
+      created_at:
+        type: string
+      file_url:
+        type: string
+      id:
+        type: string
+      sailor_id:
+        type: string
+      status:
+        $ref: '#/definitions/model.DocumentStatus'
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.DocumentStatus:
+    enum:
+    - pending
+    - approved
+    - rejected
+    - need_revision
+    type: string
+    x-enum-varnames:
+    - DocPending
+    - DocApproved
+    - DocRejected
+    - DocNeedRevision
+  model.Race:
+    properties:
+      boat_class:
+        type: string
+      created_at:
+        type: string
+      finish_time:
+        type: number
+      group_id:
+        type: string
+      id:
+        type: string
+      judge_id:
+        type: string
+      penalty:
+        type: string
+      place:
+        type: integer
+      sail_number:
+        type: string
+      sailor_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.RaceGroup:
+    properties:
+      category_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      number:
+        type: integer
+      regatta_id:
+        type: string
+      start_at:
+        type: string
+      status:
+        $ref: '#/definitions/model.RaceGroupStatus'
+      updated_at:
+        type: string
+    type: object
+  model.RaceGroupStatus:
+    enum:
+    - scheduled
+    - running
+    - finished
+    - cancelled
+    type: string
+    x-enum-varnames:
+    - RGScheduled
+    - RGRunning
+    - RGFinished
+    - RGCancelled
+  model.Regatta:
+    properties:
+      created_at:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      start_date:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.Sailor:
+    properties:
+      birth_date:
+        type: string
+      boat_class:
+        type: string
+      created_at:
+        type: string
+      first_name:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      last_name:
+        type: string
+      middle_name:
+        type: string
+      regatta_id:
+        type: string
+      sail_number:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  model.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      last_name:
+        type: string
+      middle_name:
+        type: string
+      role:
+        $ref: '#/definitions/model.UserRole'
+      updated_at:
+        type: string
+    type: object
+  model.UserRole:
+    enum:
+    - judge
+    - secretary
+    - admin
+    type: string
+    x-enum-varnames:
+    - RoleJudge
+    - RoleSecretary
+    - RoleAdmin
+  service.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: Backend API for the sailing competition judging application. Handles
+    regattas, race groups, individual race measurements, sailors, documents, and user
+    authentication.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://github.com/user/judging-of-sailing
+  title: Judging of Sailing API
+  version: 1.0.0
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user with email and password. Returns a JWT token
+        and user info.
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.AuthResponse'
+        "400":
+          description: invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: invalid email or password
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user (judge, secretary, or admin) with email and
+        password. Returns the created user without the password hash.
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.User'
+        "400":
+          description: invalid request body
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: email conflict or other error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /categories:
+    get:
+      description: Returns all scoring categories/divisions.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Category'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List categories
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: Creates a new scoring category (age range, gender, boat class).
+      parameters:
+      - description: Category details (id is ignored)
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/model.Category'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Category'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create category
+      tags:
+      - categories
+  /categories/{id}:
+    delete:
+      description: Deletes a category by ID.
+      parameters:
+      - description: Category UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete category
+      tags:
+      - categories
+    get:
+      description: Returns a single category by its UUID.
+      parameters:
+      - description: Category UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Category'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: category not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get category by ID
+      tags:
+      - categories
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing category. The ID in the path overrides any
+        ID in the body.
+      parameters:
+      - description: Category UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated category fields
+        in: body
+        name: category
+        required: true
+        schema:
+          $ref: '#/definitions/model.Category'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Category'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update category
+      tags:
+      - categories
+  /documents:
+    post:
+      consumes:
+      - application/json
+      description: Uploads a new document (file reference) for a sailor. The file
+        itself should be stored externally; this endpoint stores the reference URL.
+      parameters:
+      - description: Document details
+        in: body
+        name: document
+        required: true
+        schema:
+          $ref: '#/definitions/model.Document'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Document'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Upload document
+      tags:
+      - documents
+  /documents/{id}:
+    delete:
+      description: Deletes a document by ID.
+      parameters:
+      - description: Document UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete document
+      tags:
+      - documents
+    get:
+      description: Returns a single document by UUID.
+      parameters:
+      - description: Document UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Document'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: document not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get document by ID
+      tags:
+      - documents
+  /documents/{id}/approve:
+    post:
+      description: Sets the document status to "approved". The checked_by field is
+        set to the authenticated user.
+      parameters:
+      - description: Document UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Optional comment
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/handler.ApproveRequest'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Approve document
+      tags:
+      - documents
+  /documents/{id}/reject:
+    post:
+      consumes:
+      - application/json
+      description: Sets the document status to "rejected" with a required comment
+        explaining the reason.
+      parameters:
+      - description: Document UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Rejection reason (comment is required)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ApproveRequest'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Reject document
+      tags:
+      - documents
+  /documents/{id}/request-revision:
+    post:
+      consumes:
+      - application/json
+      description: Sets the document status to "need_revision" with a comment explaining
+        what needs to be changed.
+      parameters:
+      - description: Document UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Revision request (comment is required)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ApproveRequest'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Request document revision
+      tags:
+      - documents
+  /race-groups:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new race group (a single start session with multiple
+        boats). Groups race measurements together.
+      parameters:
+      - description: Race group details
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/model.RaceGroup'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.RaceGroup'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create race group
+      tags:
+      - race-groups
+  /race-groups/{group_id}/races:
+    get:
+      description: Returns all race measurements for a given race group, ordered by
+        boat class and finish time.
+      parameters:
+      - description: Race group UUID
+        in: path
+        name: group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Race'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List races by group
+      tags:
+      - races
+  /race-groups/{id}:
+    delete:
+      description: Deletes a race group and all associated race measurements.
+      parameters:
+      - description: Race group UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete race group
+      tags:
+      - race-groups
+    get:
+      description: Returns a single race group by UUID.
+      parameters:
+      - description: Race group UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.RaceGroup'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: race group not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get race group by ID
+      tags:
+      - race-groups
+  /race-groups/{id}/finish:
+    post:
+      description: Changes the race group status to "finished", indicating the heat
+        has ended and no more measurements can be added.
+      parameters:
+      - description: Race group UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Finish race group
+      tags:
+      - race-groups
+  /race-groups/{id}/start:
+    post:
+      description: Changes the race group status to "running", indicating the heat
+        has started.
+      parameters:
+      - description: Race group UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Start race group
+      tags:
+      - race-groups
+  /races:
+    post:
+      consumes:
+      - application/json
+      description: Records a new individual race measurement for a boat. The judge_id
+        is automatically set from the authenticated user. The sailor_id can be null
+        if the sailor is not yet identified.
+      parameters:
+      - description: Race measurement details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RecordRaceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Race'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Record race measurement
+      tags:
+      - races
+  /races/{id}:
+    delete:
+      description: Deletes a race measurement by ID.
+      parameters:
+      - description: Race UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete race
+      tags:
+      - races
+    get:
+      description: Returns a single race measurement by UUID.
+      parameters:
+      - description: Race UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Race'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: race not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get race by ID
+      tags:
+      - races
+  /races/{id}/link-sailor:
+    post:
+      consumes:
+      - application/json
+      description: Links a previously unlinked race measurement to a sailor. Used
+        when the sailor was not known at measurement time.
+      parameters:
+      - description: Race UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Sailor ID to link
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LinkSailorRequest'
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Link race to sailor
+      tags:
+      - races
+  /races/{id}/result:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the finish time, place, and penalty for a race measurement.
+      parameters:
+      - description: Race UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated result fields
+        in: body
+        name: result
+        required: true
+        schema:
+          $ref: '#/definitions/handler.UpdateResultRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update race result
+      tags:
+      - races
+  /regattas:
+    get:
+      description: Returns all regattas ordered by start date descending.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Regatta'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List regattas
+      tags:
+      - regattas
+    post:
+      consumes:
+      - application/json
+      description: Creates a new regatta with title, dates and optional location.
+      parameters:
+      - description: Regatta details (id, created_at, updated_at are ignored)
+        in: body
+        name: regatta
+        required: true
+        schema:
+          $ref: '#/definitions/model.Regatta'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Regatta'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create regatta
+      tags:
+      - regattas
+  /regattas/{id}:
+    delete:
+      description: Deletes a regatta and all associated data (race groups, races,
+        sailors, documents).
+      parameters:
+      - description: Regatta UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete regatta
+      tags:
+      - regattas
+    get:
+      description: Returns a single regatta by its UUID.
+      parameters:
+      - description: Regatta UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Regatta'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: regatta not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get regatta by ID
+      tags:
+      - regattas
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing regatta. The ID in the path overrides any ID
+        provided in the body.
+      parameters:
+      - description: Regatta UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated regatta fields (id from path is used)
+        in: body
+        name: regatta
+        required: true
+        schema:
+          $ref: '#/definitions/model.Regatta'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Regatta'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update regatta
+      tags:
+      - regattas
+  /regattas/{regatta_id}/race-groups:
+    get:
+      description: Returns all race groups (heats) for a given regatta, ordered by
+        group number.
+      parameters:
+      - description: Regatta UUID
+        in: path
+        name: regatta_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.RaceGroup'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List race groups by regatta
+      tags:
+      - race-groups
+  /regattas/{regatta_id}/sailors:
+    get:
+      description: Returns all sailors registered in a given regatta.
+      parameters:
+      - description: Regatta UUID
+        in: path
+        name: regatta_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Sailor'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List sailors by regatta
+      tags:
+      - sailors
+  /regattas/{regatta_id}/sailors/find:
+    get:
+      description: Finds a sailor by their boat class and sail number within a specific
+        regatta. Used by judges to link race measurements to sailors.
+      parameters:
+      - description: Regatta UUID
+        in: path
+        name: regatta_id
+        required: true
+        type: string
+      - description: Boat class (e.g. Optimist, Laser)
+        in: query
+        name: boat_class
+        required: true
+        type: string
+      - description: Sail number on the boat
+        in: query
+        name: sail_number
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Sailor'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: sailor not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Find sailor by class and sail number
+      tags:
+      - sailors
+  /sailors:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new sailor (participant) in a regatta. The combination
+        (regatta_id, boat_class, sail_number) must be unique.
+      parameters:
+      - description: Sailor details
+        in: body
+        name: sailor
+        required: true
+        schema:
+          $ref: '#/definitions/model.Sailor'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.Sailor'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create sailor
+      tags:
+      - sailors
+  /sailors/{id}:
+    delete:
+      description: Deletes a sailor and all associated documents and race links.
+      parameters:
+      - description: Sailor UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete sailor
+      tags:
+      - sailors
+    get:
+      description: Returns a single sailor by UUID.
+      parameters:
+      - description: Sailor UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Sailor'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: sailor not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get sailor by ID
+      tags:
+      - sailors
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing sailor's details. The ID in the path overrides
+        any ID in the body.
+      parameters:
+      - description: Sailor UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated sailor fields
+        in: body
+        name: sailor
+        required: true
+        schema:
+          $ref: '#/definitions/model.Sailor'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Sailor'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update sailor
+      tags:
+      - sailors
+  /sailors/{sailor_id}/documents:
+    get:
+      description: Returns all documents for a given sailor, ordered by creation date
+        descending.
+      parameters:
+      - description: Sailor UUID
+        in: path
+        name: sailor_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Document'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List documents by sailor
+      tags:
+      - documents
+securityDefinitions:
+  BearerAuth:
+    description: 'JWT token obtained from POST /api/v1/auth/login. Use format: Bearer
+      <token>'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
