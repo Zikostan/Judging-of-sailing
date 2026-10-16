@@ -84,3 +84,36 @@ All API routes are prefixed with `/api/v1`. Protected routes require a valid JWT
 | `POST` | `/api/v1/documents/{id}/reject` | Reject a document |
 | `POST` | `/api/v1/documents/{id}/request-revision` | Request a revision of a document |
 | `DELETE` | `/api/v1/documents/{id}` | Delete a document |
+
+## Configuration
+
+The server is configured through environment variables. Required secrets have **no default values** — the server exits with an error if they are missing, so it can never run in production with a known default password or signing key.
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `SERVER_ADDR` | no | `:8080` | HTTP listen address |
+| `DATABASE_URL` | **yes** | — | PostgreSQL connection string |
+| `JWT_SECRET` | **yes** | — | HMAC key used to sign JWT tokens |
+| `JWT_EXPIRATION` | no | `24h` | Token lifetime (Go duration) |
+| `MIGRATION_PATH` | no | `file://migrations` | Path to SQL migrations |
+| `ALLOWED_ORIGINS` | no | `*` | `Access-Control-Allow-Origin` value |
+
+### Local development
+
+```bash
+cd backend
+cp .env.example .env   # then fill in real DATABASE_URL and JWT_SECRET
+go run ./cmd/server
+```
+
+The `.env` file is loaded automatically via [godotenv](https://github.com/joho/godotenv) and is listed in `.gitignore`. Never commit real secrets.
+
+Generate a strong JWT secret:
+
+```bash
+openssl rand -hex 32
+```
+
+### Production
+
+Provide secrets through your platform's secret management instead of a `.env` file, for example Docker/Swarm secrets, Kubernetes `Secret`, or a vault (Vault, AWS/GCP Secret Manager). The application always reads them via environment variables, so only the source of the values changes.
