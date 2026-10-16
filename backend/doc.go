@@ -3,7 +3,15 @@
 // # Быстрый старт
 //
 //	cd backend
-//	export DATABASE_URL="postgres://postgres:postgres@localhost:5432/judging?sslmode=disable"
+//	cp .env.example .env      # затем впишите реальные DATABASE_URL и JWT_SECRET
+//	go run ./cmd/server
+//
+// Файл .env читается автоматически (godotenv) и не коммитится. Секреты
+// DATABASE_URL и JWT_SECRET обязательны: без них сервер завершится с ошибкой.
+// Альтернативно значения можно задать переменными окружения процесса:
+//
+//	export DATABASE_URL="postgres://postgres:password@localhost:5432/judging?sslmode=disable"
+//	export JWT_SECRET="$(openssl rand -hex 32)"
 //	go run ./cmd/server
 //
 // После запуска:
@@ -14,7 +22,7 @@
 //
 //	cmd/server/main.go          — точка входа, инициализация и запуск
 //	internal/
-//	  config/config.go           — конфигурация из env-переменных
+//	  config/config.go           — конфигурация из env-переменных / .env (godotenv)
 //	  model/models.go            — доменные типы и бизнес-правила
 //	  repository/                — слой доступа к данным (PostgreSQL + pgx)
 //	    pool.go                  — пул соединений
